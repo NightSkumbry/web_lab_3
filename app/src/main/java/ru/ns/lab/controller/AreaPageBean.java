@@ -1,0 +1,194 @@
+package ru.ns.lab.controller;
+
+import java.sql.SQLException;
+import java.util.List;
+
+import ru.ns.lab.model.HitResult;
+import ru.ns.lab.repository.HitResultDAO;
+import ru.ns.lab.service.area.abs.IArea;
+import ru.ns.lab.service.area.variant.Var6386_lab3;
+import ru.ns.lab.service.params.Params;
+import ru.ns.lab.service.params.ParamsException;
+import ru.ns.lab.service.params.ParamsParser;
+
+public class AreaPageBean {
+    private String x = "0";
+    private String y = "0";
+    private String r = "1";
+    private String clickX = "";
+    private String clickY = "";
+    private int toDeleteId;
+
+    private HitResultsBean hitResultsBean;
+
+    private KafkaEventPublisher kafkaPublisher = new KafkaEventPublisher("kafka:9092", "point-events-topic");
+    private final HitResultDAO hitResultDAO = new HitResultDAO();
+    private final IArea area = new Var6386_lab3();
+    private final ParamsParser parser = new ParamsParser();
+    private final List<Double> allowedRValues = List.of(1d, 1.25d, 1.5d, 1.75d, 2d, 2.25d, 2.5d, 2.75d, 3d, 3.25d, 3.5d, 3.75d, 4d);
+
+
+    public void checkFormHit() {
+        System.out.println("Checking hit for X: " + x + ", Y: " + y + ", R: " + r);
+        Params params;
+        
+        try {
+            params = new Params(parser.parseX(x), parser.parseY(y), parser.parseR(r));
+        }
+        catch (ParamsException e) {
+            System.out.println("Parameter parsing error: " + e.getMessage());
+            return;
+        }
+
+        System.out.println("Parsed params: " + params);
+
+        boolean hit = area.checkHit(params.getX(), params.getY(), params.getR());
+        double maxMissR = allowedRValues
+            .stream()
+            .filter(r_val -> !area.checkHit(params.getX(), params.getY(), r_val))
+            .max(Double::compare)
+            .orElse(0d);
+
+        System.out.println("Hit result: " + hit + ", Max miss R: " + maxMissR);
+        System.out.println(area.getLog());
+        
+
+        HitResult hitResult = new HitResult(
+            params.getX(),
+            params.getY(),
+            params.getR(),
+            hit,
+            maxMissR
+        );
+        try {
+            int generatedId = hitResultDAO.addResult(hitResult);
+            hitResult.setId(generatedId);
+            hitResultsBean.addResult(hitResult);
+
+            kafkaPublisher.publishHitResult(hitResult);
+        } catch (SQLException e) {
+            System.out.println("Error adding hit result to database: " + e.getMessage());
+        }
+
+    }
+
+    public void checkFreeHit() {
+        System.out.println("Checking hit for X: " + x + ", Y: " + y + ", R: " + r);
+        Params params;
+        
+        try {
+            params = new Params(parser.parseX(clickX), parser.parseY(clickY), parser.parseR(r));
+        }
+        catch (ParamsException e) {
+            System.out.println("Parameter parsing error: " + e.getMessage());
+            return;
+        }
+
+        System.out.println("Parsed params: " + params);
+
+        boolean hit = area.checkHit(params.getX(), params.getY(), params.getR());
+        double maxMissR = allowedRValues
+            .stream()
+            .filter(r_val -> !area.checkHit(params.getX(), params.getY(), r_val))
+            .max(Double::compare)
+            .orElse(0d);
+
+        System.out.println("Hit result: " + hit + ", Max miss R: " + maxMissR);
+        System.out.println(area.getLog());
+        
+
+        HitResult hitResult = new HitResult(
+            params.getX(),
+            params.getY(),
+            params.getR(),
+            hit,
+            maxMissR
+        );
+
+        try {
+            int generatedId = hitResultDAO.addResult(hitResult);
+            hitResult.setId(generatedId);
+            hitResultsBean.addResult(hitResult);
+
+            kafkaPublisher.publishHitResult(hitResult);
+        } catch (SQLException e) {
+            System.out.println("Error adding hit result to database: " + e.getMessage());
+        }
+    }
+
+    public void deleteAllResults() {
+        try {
+            hitResultDAO.deleteAllResults();
+        } catch (SQLException e) {
+            System.out.println("Error deleting all hit results from database: " + e.getMessage());
+        }
+        hitResultsBean.deleteAllResults();
+    }
+
+    public void deleteResult() {
+        try {
+            hitResultDAO.deleteResultById(toDeleteId);
+        } catch (SQLException e) {
+            System.out.println("Error deleting hit result from database: " + e.getMessage());
+        }
+        hitResultsBean.deleteResult(toDeleteId);
+    }
+
+
+
+    public int getToDeleteId() {
+        return toDeleteId;
+    }
+
+    public void setToDeleteId(int toDeleteId) {
+        this.toDeleteId = toDeleteId;
+    }
+
+    public String getX() {
+        return x;
+    }
+
+    public void setX(String x) {
+        this.x = x;
+    }
+
+    public String getY() {
+        return y;
+    }
+
+    public void setY(String y) {
+        this.y = y;
+    }
+
+    public String getR() {
+        return r;
+    }
+
+    public void setR(String r) {
+        this.r = r;
+    }
+
+    public String getClickX() {
+        return clickX;
+    }
+
+    public void setClickX(String xClick) {
+        this.clickX = xClick;
+    }
+
+    public String getClickY() {
+        return clickY;
+    }
+
+    public void setClickY(String yClick) {
+        this.clickY = yClick;
+    }
+
+    public HitResultsBean getHitResultsBean() {
+        return hitResultsBean;
+    }
+
+    public void setHitResultsBean(HitResultsBean hitResultsBean) {
+        this.hitResultsBean = hitResultsBean;
+    }
+}

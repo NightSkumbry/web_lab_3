@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<f:view contentType="text/html;charset=UTF-8" encoding="UTF-8"></f:view>
+<h:head>
+    <link rel="icon" type="image/png" href="#{request.contextPath}/resources/images/favicon.png" />
+    <!-- <link rel="preload" href="#{request.contextPath}/resources/fonts/supercell-magic_0.ttf" as="font" type="font/ttf" /> -->
+    <title>Slava_NS - Lab 3</title>
+    <h:outputStylesheet library="styles" name="index.css"/>
+    <style>
+        @font-face {
+            font-family: 'supercell-magic';
+            src: url('#{request.contextPath}/resources/fonts/supercell-magic_0.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+    </style>
+</h:head>
+<h:body>
+    <header>
+        <div>
+            <div class= "header-left">
+                <h1 class="header-name">
+                    <h:outputText value="#{indexBean.fullName}" />
+                </h1>
+                <div>
+                    <h2 class="header-group">
+                        <span>Группа: </span>
+                        <h:outputText value="#{indexBean.group}" />
+                    </h2>
+                    <h2 class="header-variant">
+                        <span>Вариант: </span>
+                        <h:outputText value="#{indexBean.variant}" />
+                    </h2>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-links">
+                    <a href="https://github.com/NightSkumbry" target="_blank" rel="noopener">
+                        <img src="https://cdn.jsdelivr.net/npm/simple-icons@11.15.0/icons/github.svg" alt="GitHub"/>
+                    </a>
+                    <a href="https://t.me/night_skumbry" target="_blank" rel="noopener">
+                        <img src="https://cdn.jsdelivr.net/npm/simple-icons@11.15.0/icons/telegram.svg" alt="Telegram"/>
+                    </a>
+                    <a href="https://clck.ru/3PJJkE" target="_blank" rel="noopener">
+                        <img src="https://cdn.jsdelivr.net/npm/simple-icons@11.15.0/icons/youtube.svg" alt="youtube"/>
+                    </a>
+                    <a href="https://steamcommunity.com/id/night_skumbry" target="_blank" rel="noopener">
+                        <img src="https://cdn.jsdelivr.net/npm/simple-icons@11.15.0/icons/steam.svg" alt="Steam"/>
+                    </a>
+                    <a href="https://link.brawlstars.com/invite/friend/ru?tag=899YUC9QU&amp;token=ednadfns" target="_blank" rel="noopener">
+                        <img src="#{request.contextPath}/resources/images/icons8-brawl-stars-500.svg" alt="Brawl Stars"/>
+                    </a>
+                    <a href="https://псж.онлайн" target="_blank" rel="noopener">
+                        <img src="#{request.contextPath}/resources/images/psg.png" alt="ПСЖ"/>
+                    </a>
+                </div>
+                <!-- <h2>Theme switcher placeholder</h2> -->
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <h3>
+            <p:button value="Проверка попаданий" outcome="toArea" />
+        </h3>
+
+        <h:inputHidden id="serverTime" value="#{indexBean.timestamp}" />
+        <h3>
+            <h:outputText id="localTimeDisplay" value="Загрузка времени с сервера..." />
+        </h3>
+
+        <canvas id="background" width="500" height="500"></canvas>
+        
+        
+        <h:form id="indexForm">
+            <p:poll update="serverTime"
+                    interval="13"
+                    oncomplete="updateLocalTime();" />
+        </h:form>
+    </main>
+    
+    <h:outputScript library="scripts" name="index.js" />
+</h:body>
+</html>

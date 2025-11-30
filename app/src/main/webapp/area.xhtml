@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<f:view contentType="text/html;charset=UTF-8" encoding="UTF-8"></f:view>
+<h:head>
+    <link rel="icon" type="image/png" href="#{request.contextPath}/resources/images/favicon.png"/>
+    <title>Slava_NS - Lab 3</title>
+    <h:outputStylesheet library="styles" name="area.css"/>
+    <script type="module" src="#{request.contextPath}/resources/scripts/area.js"></script>
+</h:head>
+<h:body>
+    <main>
+        <h3 class="to-main">
+            <p:button value="На главную" outcome="toIndex" />
+        </h3>
+        <section class="lab-section">
+            <div class="lab-form">
+                <h:form id="data-form" styleClass="data-form-container">
+                    <div class="input-group">
+                        <p:outputLabel for="x-spinner" value="Введите X:" styleClass="field-label" />
+                        <p:spinner id="x-spinner" value="#{areaBean.x}" stepFactor="1" min="-3" max="3" styleClass="input-field" />
+                    </div>
+
+                    <div class="input-group">
+                        <p:outputLabel for="y-input" value="Введите Y:" styleClass="field-label" />
+                        <p:inputText id="y-input" value="#{areaBean.y}" styleClass="input-field">
+                            <f:validator validatorId="YValidator" />
+                            <p:ajax event="valueChange" update="y-err" />
+                        </p:inputText>
+                        <p:message id="y-err" for="y-input" display="text" />
+                    </div>
+
+                    <div class="input-group">
+                        <p:outputLabel for="r-value" value="Введите R:" styleClass="field-label" />
+                        <h:inputHidden id="r-value" value="#{areaBean.r}" />
+                        <div class="slider-container">
+                            <p:slider widgetVar="r-slider" id="r-slider" for="r-value" display="r-display" step="0.25" minValue="1" maxValue="4" styleClass="p-slider" onSlide="setTimeout(changeR, 0);" />
+                            <h:outputText id="r-display" value="#{areaBean.r}" class="slider-value" />
+                        </div>
+                    </div>
+                    <div>
+                        <p:commandButton value="Проверить" action="#{areaBean.checkFormHit}" update="results-table" oncomplete="showPoints();" />
+                    </div>
+
+                    <!-- hidden -->
+                    <h:inputHidden value="#{areaBean.clickX}" id="x-click" />
+                    <h:inputHidden value="#{areaBean.clickY}" id="y-click" />
+                    <p:commandButton id="check-click"
+                                    update="results-table"
+                                    oncomplete="showPoints();"
+                                    action="#{areaBean.checkFreeHit}"
+                                    style="display: none;">
+                    </p:commandButton>
+                    <!-- hidden -->
+                </h:form>
+            </div>
+            
+            <div class="lab-canvas">
+                <canvas id="background" width="600" height="600"></canvas>
+                <canvas id="foreground" width="600" height="600"></canvas>
+                <canvas id="forethestground" width="600" height="600"></canvas>
+            </div>
+
+            <div id="lab-results" class="lab-results">
+                <h:form id="delete-all-hidden-form">
+                    <p:commandButton id="delete-all-btn"
+                                    update="results-table"
+                                    oncomplete="showPoints();"
+                                    action="#{areaBean.deleteAllResults()}"
+                                    style="display:none;">
+                    </p:commandButton>
+                </h:form>
+
+                <h:form id="delete-hidden-form">
+                    <h:inputHidden value="#{areaBean.toDeleteId}" id="to-delete-id"/>
+                    <p:commandButton id="delete-btn"
+                                    update="results-table"
+                                    oncomplete="showPoints();"
+                                    action="#{areaBean.deleteResult()}"
+                                    style="display:none;">
+                    </p:commandButton>
+                </h:form>
+
+                <p:dataTable id="results-table" styleClass="results-table" value="#{areaBean.hitResultsBean.results}" var="res">
+                    <p:column headerText="Узреть" styleClass="select-col" id="nav-column">
+                        <span data-id="#{res.id}"><p:button value="." onclick="navigatePoint(#{res.id});" /></span>
+                    </p:column>
+
+                    <p:column headerText="X" styleClass="x-col" id="x-column">
+                        <h:outputText value="#{res.x}">
+                            <f:convertNumber maxFractionDigits="4" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column headerText="Y" styleClass="y-col" id="y-column">
+                        <h:outputText value="#{res.y}">
+                            <f:convertNumber maxFractionDigits="4" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column headerText="R" styleClass="r-col" id="r-column">
+                        <h:outputText value="#{res.r}">
+                            <f:convertNumber maxFractionDigits="4" />
+                        </h:outputText>
+                    </p:column>
+
+                    <p:column headerText="Результат" styleClass="result-col" id="result-column">
+                        <span data-maxMissR="#{res.maxMissR}"><h:outputText value="#{res.hit ? 'Попадание' : 'Промах'}" /></span>
+                    </p:column>
+
+                    <p:column styleClass="delete-col" id="delete-column">
+                        <f:facet name="header">
+                            <img src="#{request.contextPath}/resources/images/free-icon-recycling-2529753.png" alt="delete-all" width="23" height="23"
+                            onclick="document.getElementById('delete-all-hidden-form:delete-all-btn').click();" />
+                        </f:facet>
+                        
+                        <img class="delete-icon" alt="delete" src="#{request.contextPath}/resources/images/icons8-trash.svg" width="23" height="23"
+                        onclick="document.getElementById('delete-hidden-form:to-delete-id').value = #{res.id}; document.getElementById('delete-hidden-form:delete-btn').click();" />
+                    </p:column>
+
+                </p:dataTable>
+            </div>
+        </section>
+    </main>
+</h:body>
+</html>

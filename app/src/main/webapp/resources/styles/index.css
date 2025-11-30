@@ -1,0 +1,47 @@
+/* ====== HEADER ====== */
+
+header {
+    border-bottom: 2px solid black;
+    padding-bottom: 0.5em;
+    font-family: cursive;
+    font-size: 16px;
+}
+
+header > div {
+    margin-top: -0.67em;
+}
+
+.header-left {
+    display: inline-block;
+}
+
+.header-group {
+    display: inline;
+    margin: 0;
+}
+
+.header-variant {
+    float: right;
+    margin: 0;
+}
+
+.header-right {
+    float: right;
+    margin-right: 0.67em;
+    margin-top: 1.33em;
+}
+
+.header-links {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.header-links img {
+    width: 2em;
+    height: 2em;
+    margin-right: 10px;
+}
+
+.header-links a:last-child img {
+    margin-right: 0;
+}

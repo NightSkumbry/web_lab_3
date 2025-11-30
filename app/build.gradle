@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+    id 'war'
+}
+
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    providedCompile 'javax:javaee-web-api:8.0.1'
+
+    implementation 'org.glassfish:jakarta.faces:2.3.20'
+
+    implementation 'org.primefaces:primefaces:10.0.0'
+
+    implementation 'com.google.code.gson:gson:2.13.2'
+
+    implementation 'com.oracle.database.jdbc:ojdbc11:23.26.0.0.0'
+
+    implementation 'org.apache.kafka:kafka-clients:4.1.1'
+}
+
+tasks.war {
+    archiveFileName = "lab3.war"
+}

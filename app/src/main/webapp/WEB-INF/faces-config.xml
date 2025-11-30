@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+              http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_3.xsd"
+              version="2.3">
+
+    <managed-bean>
+        <managed-bean-name>indexBean</managed-bean-name>
+        <managed-bean-class>ru.ns.lab.controller.IndexPageBean</managed-bean-class>
+        <managed-bean-scope>application</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>areaBean</managed-bean-name>
+        <managed-bean-class>ru.ns.lab.controller.AreaPageBean</managed-bean-class>
+        <managed-bean-scope>application</managed-bean-scope>
+        <managed-property>
+            <property-name>hitResultsBean</property-name>
+            <value>#{hitResultsBean}</value>
+        </managed-property>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>hitResultsBean</managed-bean-name>
+        <managed-bean-class>ru.ns.lab.controller.HitResultsBean</managed-bean-class>
+        <managed-bean-scope>application</managed-bean-scope>
+    </managed-bean>
+
+
+    <navigation-rule>
+        <from-view-id>/index.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>toArea</from-outcome>
+            <to-view-id>/area.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+    <navigation-rule>
+        <from-view-id>/area.xhtml</from-view-id>
+        <navigation-case>
+            <from-outcome>toIndex</from-outcome>
+            <to-view-id>/index.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+    <validator>
+        <validator-id>YValidator</validator-id>
+        <validator-class>ru.ns.lab.controller.validator.YValidator</validator-class>
+    </validator>
+
+</faces-config>

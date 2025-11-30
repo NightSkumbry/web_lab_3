@@ -1,0 +1,108 @@
+/* ====== MAIN LAYOUT ====== */
+main {
+    margin-top: 2em;
+}
+
+.lab-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center top;
+    margin-bottom: 2em;
+}
+
+/* #data-form {
+    width: 8em;
+} */
+
+/* Общий контейнер формы */
+.data-form-container {
+    max-width: 15em;
+    margin: 2em auto;
+    padding: 1.5em;
+}
+
+/* Заголовки полей */
+.field-label {
+    display: block;
+    margin-bottom: 0.5em;
+}
+
+/* Поле ввода */
+.input-field {
+    width: 100%;
+    padding: 0.75em;
+    margin-bottom: 1.5em;
+    box-sizing: border-box;
+}
+
+/* Слайдер (R) */
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 1.5em;
+}
+
+.slider-label {
+    min-width: 7em;
+}
+
+.p-slider {
+    flex-grow: 1;
+}
+
+/* Кнопка */
+.submit-button {
+    width: 100%;
+    padding: 0.75em;
+}
+
+/* Группировка по логике */
+.input-group {
+    margin-bottom: 2em;
+    padding-bottom: 2em;
+    border-bottom: 1px solid transparent; /* Можно убрать, если не нужна линия */
+}
+
+.input-group:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* Для слайдера — чтобы не съезжало */
+.slider-value {
+    min-width: 2em;
+    text-align: right;
+}
+
+/* #data-form > div:nth-child(2) {
+    margin-top: 1em;
+    margin-bottom: 1em;
+} */
+
+
+
+
+.lab-canvas {
+    display: flex;
+    flex-direction: column;
+    margin-top: 2em auto;
+}
+
+#foreground, #forethestground {
+    margin-top: -600px;
+}
+
+.lab-results {
+    max-height: 600px;
+    overflow-y: auto;
+    margin-right: 0.67em;
+    max-width: fit-content;
+}
+
+
+.to-main {
+    margin: 2em auto;
+    padding-left: 1.5em;
+}

@@ -1,0 +1,96 @@
+### Gradle ###
+.gradle/
+build/
+!src/main/**/*
+!src/test/**/*
+
+# Gradle wrapper
+gradle/wrapper/gradle-wrapper.properties
+!gradle/wrapper/gradle-wrapper.properties
+
+### Java ###
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.tar
+
+# IDE specific
+.idea/
+*.iws
+*.iml
+*.ipr
+*.sw?
+*~
+
+# Maven
+target/
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# Eclipse
+.settings/
+.project
+.classpath
+.apt_generated
+.factorypath
+.tern-project
+.tern-cache
+.jsconfig
+.jsdtscope
+
+# IntelliJ IDEA
+.idea/
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# VS Code (если используется)
+.vscode/
+
+# Compiled class file
+*.class
+
+# Log Files
+*.log
+
+# BlueJ
+*.ctxt
+
+# Local configuration file (sdk path,,)
+local.properties
+
+# Gradle files (помимо wrapper)
+.gradle/
+!gradle/wrapper/
+
+# Build artifacts
+build/
+
+# IDE specific
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Windows thumbnail cache
+Thumbs.db
+ehthumbs.db
+Icon?
+
+Dockerfile
+
+docker-compose.yml
+
+.dockerignore
