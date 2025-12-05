@@ -90,7 +90,7 @@ main {
     margin-top: 2em auto;
 }
 
-#foreground, #forethestground {
+#foreground, #forethestground, #statground {
     margin-top: -600px;
 }
 

@@ -19,11 +19,21 @@
             <property-name>hitResultsBean</property-name>
             <value>#{hitResultsBean}</value>
         </managed-property>
+        <managed-property>
+            <property-name>rabbitPublisher</property-name>
+            <value>#{rabbitPublisher}</value>
+        </managed-property>
     </managed-bean>
 
     <managed-bean>
         <managed-bean-name>hitResultsBean</managed-bean-name>
         <managed-bean-class>ru.ns.lab.controller.HitResultsBean</managed-bean-class>
+        <managed-bean-scope>application</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>rabbitPublisher</managed-bean-name>
+        <managed-bean-class>ru.ns.lab.controller.RabbitPublisher</managed-bean-class>
         <managed-bean-scope>application</managed-bean-scope>
     </managed-bean>
 

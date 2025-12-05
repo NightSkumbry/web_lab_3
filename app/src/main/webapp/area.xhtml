@@ -11,6 +11,7 @@
     <title>Slava_NS - Lab 3</title>
     <h:outputStylesheet library="styles" name="area.css"/>
     <script type="module" src="#{request.contextPath}/resources/scripts/area.js"></script>
+    <script type="module" src="#{request.contextPath}/resources/scripts/stats.js"></script>
 </h:head>
 <h:body>
     <main>
@@ -61,6 +62,7 @@
             
             <div class="lab-canvas">
                 <canvas id="background" width="600" height="600"></canvas>
+                <canvas id="statground" width="600" height="600"></canvas>
                 <canvas id="foreground" width="600" height="600"></canvas>
                 <canvas id="forethestground" width="600" height="600"></canvas>
             </div>
@@ -124,6 +126,50 @@
 
                 </p:dataTable>
             </div>
+        </section>
+        <section>
+            <p:poll
+                interval="5"
+                listener="#{areaBean.updateStats}"
+                update="statsDisplay"
+                oncomplete="showPoints();" />
+
+            <!-- Блок с отображением статистики -->
+            <p:panelGrid id="statsDisplay">
+                <p:row>
+                    <p:column><p:button value="Попаданий" onclick="navigateAllPoint(true);" /></p:column>
+                    <p:column><p:button value="Промахов" onclick="navigateAllPoint(false);" /></p:column>
+                    <p:column><p:button value="Всегда попадают" onclick="navigateAlwaysPoint(true);" /></p:column>
+                    <p:column><p:button value="Всегда мимо" onclick="navigateAlwaysPoint(false);" /></p:column>
+                    <p:column><p:button value="Средняя точка" onclick="navigateAvPoint(#{areaBean.lastStats.averageXCoordinate}, #{areaBean.lastStats.averageYCoordinate});" /></p:column>
+                    <p:column><p:button value="Средняя удалённость" onclick="showRadius(#{areaBean.lastStats.averageDistanceFromCenter});" /></p:column>
+                    <p:column><p:button value="Средний радиус" onclick="showR(#{areaBean.lastStats.averageRadius});" /></p:column>
+                </p:row>
+                <p:row>
+                    <p:column>#{areaBean.lastStats.hits}</p:column>
+                    <p:column>#{areaBean.lastStats.misses}</p:column>
+                    <p:column>#{areaBean.lastStats.alwaysHitAmount}</p:column>
+                    <p:column>#{areaBean.lastStats.alwaysMissAmount}</p:column>
+                    <p:column id="averagePoint">
+                        (<h:outputText value="#{areaBean.lastStats.averageXCoordinate}">
+                            <f:convertNumber maxFractionDigits="4" />
+                        </h:outputText>, 
+                        <h:outputText value="#{areaBean.lastStats.averageYCoordinate}">
+                            <f:convertNumber maxFractionDigits="4" />
+                        </h:outputText>)
+                    </p:column>
+                    <p:column id="averageDistace">
+                        <h:outputText value="#{areaBean.lastStats.averageDistanceFromCenter}">
+                            <f:convertNumber maxFractionDigits="4" />
+                        </h:outputText>
+                    </p:column>
+                    <p:column id="averageRadius">
+                        <h:outputText value="#{areaBean.lastStats.averageRadius}">
+                            <f:convertNumber maxFractionDigits="4" />
+                        </h:outputText>
+                    </p:column>
+                </p:row>
+            </p:panelGrid>
         </section>
     </main>
 </h:body>

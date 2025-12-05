@@ -109,7 +109,89 @@ forethestground.addEventListener("click", function(event) {
 });
 
 
-function navigatePoint(pointId) {
+function navigateAvPoint(x, y) {
+    const existingIndex = animations.findIndex(anim => anim.id === -1);
+
+    let xv = x * areaCanvas.gridScale;
+    if (xv < -areaCanvas.maxX + areaCanvas.dotRadius/2) {xv = 6 - areaCanvas.maxX}
+    else if (xv > areaCanvas.maxX - areaCanvas.dotRadius/2) {xv = areaCanvas.maxX - 6}
+
+    let yv = y * areaCanvas.gridScale;
+    if (yv < -areaCanvas.maxY + areaCanvas.dotRadius/2) {yv = 6 - areaCanvas.maxY}
+    else if (yv > areaCanvas.maxY - areaCanvas.dotRadius/2) {yv = areaCanvas.maxY - 6}
+
+    const newAnimation = {
+        id: -1,
+        x: xv,
+        y: yv,
+        startTime: null
+    };
+
+    if (existingIndex !== -1) {
+        animations[existingIndex] = newAnimation;
+    } else {
+        animations.push(newAnimation);
+    }
+
+    requestAnimationFrame(navigation_animation);
+}
+
+
+function navigateAllPoint(hit) {
+
+    let resultTable = document.querySelector('#results-table table');
+
+    let x_ind = 1;
+    let y_ind = 2;
+    let r_ind = 3;
+    let nav_ind = 0;
+    let hit_ind = 4;
+    for (let i = 0; i < resultTable.rows[0].cells.length; i++) {
+        if (resultTable.rows[0].cells[i].id == 'results-table:x-column') x_ind = i;
+        if (resultTable.rows[0].cells[i].id == 'results-table:y-column') y_ind = i;
+        if (resultTable.rows[0].cells[i].id == 'results-table:nav-column') nav_ind = i;
+        if (resultTable.rows[0].cells[i].id == 'results-table:r-column') r_ind = i;
+        if (resultTable.rows[0].cells[i].id == 'results-table:result-column') hit_ind = i;
+    }
+
+    for (let i = 1; i < resultTable.rows.length; i++) {
+        const row = resultTable.rows[i];
+        if (row.cells[1] && row.cells[hit_ind].innerText === (hit ? "Попадание" : "Промах")) {
+            navigatePoint(row.cells[nav_ind].children[0].dataset.id, true);
+        }
+    }
+}
+
+
+function navigateAlwaysPoint(hit) {
+    let resultTable = document.querySelector('#results-table table');
+
+    let x_ind = 1;
+    let y_ind = 2;
+    let r_ind = 3;
+    let nav_ind = 0;
+    let hit_ind = 4;
+    for (let i = 0; i < resultTable.rows[0].cells.length; i++) {
+        if (resultTable.rows[0].cells[i].id == 'results-table:x-column') x_ind = i;
+        if (resultTable.rows[0].cells[i].id == 'results-table:y-column') y_ind = i;
+        if (resultTable.rows[0].cells[i].id == 'results-table:nav-column') nav_ind = i;
+        if (resultTable.rows[0].cells[i].id == 'results-table:r-column') r_ind = i;
+        if (resultTable.rows[0].cells[i].id == 'results-table:result-column') hit_ind = i;
+    }
+
+    for (let i = 1; i < resultTable.rows.length; i++) {
+        const row = resultTable.rows[i];
+        let mmr = parseFloat(row.cells[hit_ind].children[0].dataset.maxmissr);
+        let r = parseFloat(row.cells[y_ind].innerText);
+
+        if (row.cells[1] && mmr == (hit ? 0 : 4)) {
+            navigatePoint(row.cells[nav_ind].children[0].dataset.id, true);
+        }
+    }
+}
+
+
+function navigatePoint(pointId, nChangeR) {
 
     let resultTable = document.querySelector('#results-table table');
 
@@ -152,12 +234,13 @@ function navigatePoint(pointId) {
                 animations.push(newAnimation);
             }
             
+            requestAnimationFrame(navigation_animation);
+            if (nChangeR) return;
             const new_r = parseFloat(row.cells[r_ind].innerText);
             PF('r-slider').setValue(new_r);
             document.getElementById('data-form:r-display').innerText = new_r;
             changeR();
 
-            requestAnimationFrame(navigation_animation)
         }
     }
 }
@@ -221,6 +304,10 @@ function showPoints() {
             dots[id] = {x: x, y: y, maxMissR: maxMissR};
         }
     }
+
+    let t = document.getElementById("averagePoint").innerText;
+    let xy = t.slice(1, t.length-1).split(", ");
+    dots[-1] = {x: parseFloat(xy[0]), y: parseFloat(xy[1]), maxMissR: -1}
 
     areaCanvas.drawForeground(dots);
 }
@@ -346,6 +433,9 @@ window.onload = function() {
 window.showPoints = showPoints;
 window.changeR = changeR;
 window.navigatePoint = navigatePoint;
+window.navigateAvPoint = navigateAvPoint;
+window.navigateAllPoint = navigateAllPoint;
+window.navigateAlwaysPoint = navigateAlwaysPoint;
 // window.areaCanvas = areaCanvas;
 // window.borders = borders;
 // window.shapes = shapes;

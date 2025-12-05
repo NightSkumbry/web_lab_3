@@ -1,14 +1,17 @@
-package ru.ns.lab.model;
+package ru.ns.stats.model;
 
 import java.io.Serializable;
 
 public class HitResult implements Serializable {
     private int id;
-    private final Double x;
-    private final Double y;
-    private final Double r;
-    private final Boolean hit;
-    private final Double maxMissR;
+    private Double x;
+    private Double y;
+    private Double r;
+    private Boolean hit;
+    private Double maxMissR;
+
+
+    public HitResult() {}
 
     public HitResult(int id, Double x, Double y, Double r, Boolean hit, Double maxMissR) {
         this.id = id;
@@ -29,6 +32,26 @@ public class HitResult implements Serializable {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public void setX(Double x) {
+        this.x = x;
+    }
+
+    public void setY(Double y) {
+        this.y = y;
+    }
+
+    public void setR(Double r) {
+        this.r = r;
+    }
+
+    public void setHit(Boolean hit) {
+        this.hit = hit;
+    }
+
+    public void setMaxMissR(Double maxMissR) {
+        this.maxMissR = maxMissR;
     }
 
     public int getId() {

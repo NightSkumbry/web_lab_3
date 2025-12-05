@@ -168,6 +168,13 @@ export class AreaCanvas {
                 hit ? this.colors.getColor("green", "dark") : this.colors.getColor("yellow", "dark"),
                 1
             );
+            if (dot.maxMissR == -1) {
+                drawer.setStyle(
+                    this.colors.getColor("purple", "light"),
+                    this.colors.getColor("purple", "dark"),
+                    1
+                )
+            }
 
             if (Math.abs(x) < this.maxX - margin && Math.abs(y) < this.maxY - margin) {
                 drawer.beginPath();
