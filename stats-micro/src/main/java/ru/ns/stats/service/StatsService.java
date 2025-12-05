@@ -7,6 +7,8 @@ import ru.ns.stats.model.Stats;
 import ru.ns.stats.repository.HitResultDAO;
 
 import java.sql.SQLException;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -14,6 +16,7 @@ import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class StatsService {
+    private static final Logger logger = Logger.getLogger(StatsService.class.getName());
     private final Gson gson = new Gson();
     private Stats stats = new Stats();
 
@@ -21,11 +24,14 @@ public class StatsService {
     @PostConstruct
     public void init() {
         try {
+            int count = 0;
             for (HitResult hitResult : new HitResultDAO().getAllResults()) {
                 updateStatistics(hitResult);
+                count++;
             }
+            logger.info("StatsService initialized successfully with " + count + " records");
         } catch (SQLException e) {
-            System.err.println("Error loading hit results: " + e.getMessage());
+            logger.log(Level.SEVERE, "Error loading hit results: " + e.getMessage(), e);
         }
     }
 
@@ -36,9 +42,10 @@ public class StatsService {
                 HitResult hitResult = gson.fromJson(data, HitResult.class);
                 if (hitResult != null) {
                     updateStatistics(hitResult);
+                    logger.fine("Recorded statistics for hit result ID: " + hitResult.getId());
                 }
             } catch (JsonSyntaxException e) {
-                System.err.println("Error parsing JSON: " + e.getMessage());
+                logger.log(Level.SEVERE, "Error parsing JSON: " + e.getMessage(), e);
             }
         }
     }
@@ -87,6 +94,7 @@ public class StatsService {
     }
 
     public String getStatisticsJson() {
+        logger.fine("Retrieving statistics JSON, total records: " + (stats.getHits() + stats.getMisses()));
         return gson.toJson(stats);
     }
 }

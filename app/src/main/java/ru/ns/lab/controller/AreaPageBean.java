@@ -8,8 +8,8 @@ import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-
-import javax.annotation.PostConstruct;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import com.google.gson.Gson;
 
@@ -23,6 +23,8 @@ import ru.ns.lab.service.params.ParamsException;
 import ru.ns.lab.service.params.ParamsParser;
 
 public class AreaPageBean {
+    private static final Logger logger = Logger.getLogger(AreaPageBean.class.getName());
+
     private String x = "0";
     private String y = "0";
     private String r = "1";
@@ -51,29 +53,29 @@ public class AreaPageBean {
             HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
             if (res.statusCode() == 200) {
                 this.lastStats = new Gson().fromJson(res.body(), Stats.class);
-                // System.out.println("Fetched stats: " + res.body());
+                logger.fine("Fetched stats: " + res.body());
             } else {
-                System.err.println("Failed to fetch stats, status code: " + res.statusCode());
+                logger.severe("Failed to fetch stats, status code: " + res.statusCode());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error fetching stats from statistics service", e);
         }
     }
 
 
     public void checkFormHit() {
-        System.out.println("Checking hit for X: " + x + ", Y: " + y + ", R: " + r);
+        logger.fine("Checking hit for X: " + x + ", Y: " + y + ", R: " + r);
         Params params;
-        
+
         try {
             params = new Params(parser.parseX(x), parser.parseY(y), parser.parseR(r));
         }
         catch (ParamsException e) {
-            System.out.println("Parameter parsing error: " + e.getMessage());
+            logger.log(Level.WARNING, "Parameter parsing error: " + e.getMessage(), e);
             return;
         }
 
-        System.out.println("Parsed params: " + params);
+        logger.fine("Parsed params: " + params);
 
         boolean hit = area.checkHit(params.getX(), params.getY(), params.getR());
         double maxMissR = allowedRValues
@@ -82,9 +84,9 @@ public class AreaPageBean {
             .max(Double::compare)
             .orElse(0d);
 
-        System.out.println("Hit result: " + hit + ", Max miss R: " + maxMissR);
-        System.out.println(area.getLog());
-        
+        logger.fine("Hit result: " + hit + ", Max miss R: " + maxMissR);
+        logger.fine(area.getLog());
+
 
         HitResult hitResult = new HitResult(
             params.getX(),
@@ -103,24 +105,24 @@ public class AreaPageBean {
             });
 
         } catch (SQLException e) {
-            System.out.println("Error adding hit result to database: " + e.getMessage());
+            logger.log(Level.SEVERE, "Error adding hit result to database: " + e.getMessage(), e);
         }
 
     }
 
     public void checkFreeHit() {
-        System.out.println("Checking hit for X: " + x + ", Y: " + y + ", R: " + r);
+        logger.fine("Checking hit for X: " + x + ", Y: " + y + ", R: " + r);
         Params params;
-        
+
         try {
             params = new Params(parser.parseX(clickX), parser.parseY(clickY), parser.parseR(r));
         }
         catch (ParamsException e) {
-            System.out.println("Parameter parsing error: " + e.getMessage());
+            logger.log(Level.WARNING, "Parameter parsing error: " + e.getMessage(), e);
             return;
         }
 
-        System.out.println("Parsed params: " + params);
+        logger.fine("Parsed params: " + params);
 
         boolean hit = area.checkHit(params.getX(), params.getY(), params.getR());
         double maxMissR = allowedRValues
@@ -129,9 +131,9 @@ public class AreaPageBean {
             .max(Double::compare)
             .orElse(0d);
 
-        System.out.println("Hit result: " + hit + ", Max miss R: " + maxMissR);
-        System.out.println(area.getLog());
-        
+        logger.fine("Hit result: " + hit + ", Max miss R: " + maxMissR);
+        logger.fine(area.getLog());
+
 
         HitResult hitResult = new HitResult(
             params.getX(),
@@ -151,15 +153,16 @@ public class AreaPageBean {
             });
 
         } catch (SQLException e) {
-            System.out.println("Error adding hit result to database: " + e.getMessage());
+            logger.log(Level.SEVERE, "Error adding hit result to database: " + e.getMessage(), e);
         }
     }
 
     public void deleteAllResults() {
         try {
             hitResultDAO.deleteAllResults();
+            logger.info("Deleted all hit results from database");
         } catch (SQLException e) {
-            System.out.println("Error deleting all hit results from database: " + e.getMessage());
+            logger.log(Level.SEVERE, "Error deleting all hit results from database: " + e.getMessage(), e);
         }
         hitResultsBean.deleteAllResults();
     }
@@ -167,8 +170,9 @@ public class AreaPageBean {
     public void deleteResult() {
         try {
             hitResultDAO.deleteResultById(toDeleteId);
+            logger.info("Deleted hit result with ID: " + toDeleteId + " from database");
         } catch (SQLException e) {
-            System.out.println("Error deleting hit result from database: " + e.getMessage());
+            logger.log(Level.SEVERE, "Error deleting hit result from database: " + e.getMessage(), e);
         }
         hitResultsBean.deleteResult(toDeleteId);
     }

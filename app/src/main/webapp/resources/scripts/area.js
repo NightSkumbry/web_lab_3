@@ -181,11 +181,13 @@ function navigateAlwaysPoint(hit) {
 
     for (let i = 1; i < resultTable.rows.length; i++) {
         const row = resultTable.rows[i];
-        let mmr = parseFloat(row.cells[hit_ind].children[0].dataset.maxmissr);
-        let r = parseFloat(row.cells[y_ind].innerText);
-
-        if (row.cells[1] && mmr == (hit ? 0 : 4)) {
-            navigatePoint(row.cells[nav_ind].children[0].dataset.id, true);
+        
+        if (row.cells[1]) {
+            let mmr = parseFloat(row.cells[hit_ind].children[0].dataset.maxmissr);
+            let r = parseFloat(row.cells[y_ind].innerText);
+            if (mmr == (hit ? 0 : 4)) {
+                navigatePoint(row.cells[nav_ind].children[0].dataset.id, true);
+            }
         }
     }
 }

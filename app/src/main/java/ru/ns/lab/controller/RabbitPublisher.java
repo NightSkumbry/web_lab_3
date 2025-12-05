@@ -1,6 +1,8 @@
 package ru.ns.lab.controller;
 
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -10,6 +12,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
 public class RabbitPublisher {
+    private static final Logger logger = Logger.getLogger(RabbitPublisher.class.getName());
 
     private Connection connection;
     private Channel channel;
@@ -26,20 +29,22 @@ public class RabbitPublisher {
             this.connection = factory.newConnection();
             this.channel = connection.createChannel();
             channel.queueDeclare("statistics_queue", false, false, false, null);
+            logger.info("RabbitMQ publisher initialized successfully");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error initializing RabbitMQ publisher", e);
         }
     }
 
     public void sendEvent(String json) {
         if (channel == null || !channel.isOpen()) {
-            System.err.println("RabbitMQ недоступен");
+            logger.severe("RabbitMQ is unavailable");
             return;
         }
         try {
             channel.basicPublish("", "statistics_queue", null, json.getBytes(StandardCharsets.UTF_8));
+            logger.fine("Event sent to statistics queue: " + json);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error sending event to RabbitMQ", e);
         }
     }
 
@@ -48,8 +53,9 @@ public class RabbitPublisher {
         try {
             if (channel != null) channel.close();
             if (connection != null) connection.close();
+            logger.info("RabbitMQ publisher resources closed");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error closing RabbitMQ publisher resources", e);
         }
     }
 }

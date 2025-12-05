@@ -10,9 +10,12 @@ import javax.servlet.http.HttpServletResponse;
 import ru.ns.stats.service.StatsService;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 @WebServlet("/api/stats")
 public class StatsServlet extends HttpServlet {
+    private static final Logger logger = Logger.getLogger(StatsServlet.class.getName());
+
     @Inject
     private StatsService statsService;
 
@@ -20,11 +23,13 @@ public class StatsServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        System.out.println("statsService = " + statsService);
+        logger.fine("Received GET request for statistics");
         String stats = statsService.getStatisticsJson();
-        System.out.println("Serving statistics: " + stats);
+
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().println(stats);
+
+        logger.fine("Statistics response sent successfully");
     }
 }
