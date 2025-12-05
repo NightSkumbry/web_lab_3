@@ -19,20 +19,39 @@ public class RabbitPublisher {
 
     @PostConstruct
     public void init() {
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("rabbitmq");
-        factory.setPort(5672);
-        factory.setUsername("guest");
-        factory.setPassword("guest");
+        int attempts = 0;
+        int maxAttempts = 10;
+        long delayMs = 3000;
 
-        try {
-            this.connection = factory.newConnection();
-            this.channel = connection.createChannel();
-            channel.queueDeclare("statistics_queue", false, false, false, null);
-            logger.info("RabbitMQ publisher initialized successfully");
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error initializing RabbitMQ publisher", e);
+        while (attempts < maxAttempts) {
+            try {
+                ConnectionFactory factory = new ConnectionFactory();
+                String rabbitHost = "rabbitmq";
+                factory.setHost(rabbitHost);
+                factory.setPort(5672);
+                factory.setUsername("guest");
+                factory.setPassword("guest");
+
+                this.connection = factory.newConnection();
+                this.channel = connection.createChannel();
+                channel.queueDeclare("statistics_queue", false, false, false, null);
+                logger.info("RabbitMQ publisher initialized successfully");
+                return;
+            }
+            catch (Exception e) {
+                attempts++;
+                logger.log(Level.SEVERE, "Error initializing RabbitMQ publisher", e);
+                if (attempts < maxAttempts) {
+                    try {
+                        Thread.sleep(delayMs);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                }
+            }
         }
+        throw new RuntimeException("Failed to connect to RabbitMQ after " + maxAttempts + " attempts");
     }
 
     public void sendEvent(String json) {
