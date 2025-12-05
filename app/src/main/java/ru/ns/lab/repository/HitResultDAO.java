@@ -5,10 +5,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import ru.ns.lab.model.HitResult;
 
 public class HitResultDAO {
+    private static final Logger logger = Logger.getLogger(HitResultDAO.class.getName());
+
     private final DataBaseConnector connector;
 
 
@@ -37,21 +41,33 @@ public class HitResultDAO {
                         y NUMBER(10, 8) NOT NULL,
                         r NUMBER(10, 8) NOT NULL,
                         is_hit NUMBER(1) NOT NULL,
-                        max_miss_r NUMBER(10, 8) NOT NULL
+                        max_miss_r NUMBER(10, 8) NOT NULL,
+                        deleted NUMBER(1) DEFAULT 0 NOT NULL
                     )
                 """;
                 stmt.execute(createTableSQL);
-                System.out.println("Таблица hit_results создана.");
+                logger.info("Table hit_results created.");
             } else {
-                System.out.println("Таблица hit_results уже существует.");
+                // Check if deleted column exists, if not add it
+                String checkColumnSQL = """
+                    SELECT 1 FROM user_tab_cols WHERE table_name = 'HIT_RESULTS' AND column_name = 'DELETED'
+                """;
+                try (ResultSet columnRs = stmt.executeQuery(checkColumnSQL)) {
+                    if (!columnRs.next()) {
+                        // Add the deleted column to existing table
+                        stmt.execute("ALTER TABLE hit_results ADD (deleted NUMBER(1) DEFAULT 0 NOT NULL)");
+                        logger.info("Added deleted column to hit_results table.");
+                    }
+                }
+                logger.info("Table hit_results already exists.");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error creating table if not exists", e);
         }
     }
 
     public int addResult(HitResult result) throws SQLException {
-        String insertSQL = "INSERT INTO hit_results (x, y, r, is_hit, max_miss_r) VALUES (?, ?, ?, ?, ?)";
+        String insertSQL = "INSERT INTO hit_results (x, y, r, is_hit, max_miss_r, deleted) VALUES (?, ?, ?, ?, ?, 0)";
         try (Connection connection = connector.getConnection();
              var preparedStatement = connection.prepareStatement(insertSQL, new String[]{"id"})) {
             connection.setAutoCommit(false);
@@ -62,12 +78,16 @@ public class HitResultDAO {
             preparedStatement.setInt(4, result.getHit() ? 1 : 0);
             preparedStatement.setDouble(5, result.getMaxMissR());
 
-            preparedStatement.executeUpdate();
+            int affectedRows = preparedStatement.executeUpdate();
             connection.commit();
+
+            logger.fine("Added hit result to database, affected rows: " + affectedRows);
 
             try (var generatedKeys = preparedStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    return generatedKeys.getInt(1);
+                    int id = generatedKeys.getInt(1);
+                    logger.fine("Generated ID for new hit result: " + id);
+                    return id;
                 } else {
                     throw new SQLException("Creating hit result failed, no ID obtained.");
                 }
@@ -76,7 +96,7 @@ public class HitResultDAO {
     }
 
     public List<HitResult> getAllResults() throws SQLException {
-        String selectSQL = "SELECT * FROM hit_results";
+        String selectSQL = "SELECT * FROM hit_results WHERE deleted = 0";
         try (Connection connection = connector.getConnection();
              var statement = connection.createStatement();
              var resultSet = statement.executeQuery(selectSQL)) {
@@ -95,24 +115,28 @@ public class HitResultDAO {
                 results.add(result);
             }
 
+            logger.fine("Retrieved " + results.size() + " hit results from database");
             return results;
         }
     }
 
+
     public void deleteAllResults() throws SQLException {
-        String deleteSQL = "DELETE FROM hit_results";
+        String updateSQL = "UPDATE hit_results SET deleted = 1";
         try (Connection connection = connector.getConnection();
              var statement = connection.createStatement()) {
-            statement.executeUpdate(deleteSQL);
+            int affectedRows = statement.executeUpdate(updateSQL);
+            logger.info("Soft deleted all hit results, affected rows: " + affectedRows);
         }
     }
 
     public void deleteResultById(int id) throws SQLException {
-        String deleteSQL = "DELETE FROM hit_results WHERE id = ?";
+        String updateSQL = "UPDATE hit_results SET deleted = 1 WHERE id = ?";
         try (Connection connection = connector.getConnection();
-             var preparedStatement = connection.prepareStatement(deleteSQL)) {
+             var preparedStatement = connection.prepareStatement(updateSQL)) {
             preparedStatement.setInt(1, id);
-            preparedStatement.executeUpdate();
+            int affectedRows = preparedStatement.executeUpdate();
+            logger.info("Soft deleted hit result with ID " + id + ", affected rows: " + affectedRows);
         }
     }
 
