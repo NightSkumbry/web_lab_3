@@ -26,39 +26,56 @@ public class RabbitConsumer {
 
     @PostConstruct
     public void init() {
-        try {
-            ConnectionFactory factory = new ConnectionFactory();
-            String rabbitHost = "rabbitmq";
-            factory.setHost(rabbitHost);
-            factory.setPort(5672);
-            factory.setUsername("guest");
-            factory.setPassword("guest");
+        int attempts = 0;
+        int maxAttempts = 10;
+        long delayMs = 3000;
 
-            connection = factory.newConnection();
-            channel = connection.createChannel();
+        while (attempts < maxAttempts) {
+            try {
+                ConnectionFactory factory = new ConnectionFactory();
+                String rabbitHost = "rabbitmq";
+                factory.setHost(rabbitHost);
+                factory.setPort(5672);
+                factory.setUsername("guest");
+                factory.setPassword("guest");
 
-            channel.queueDeclare("statistics_queue", false, false, false, null);
-            logger.info("RabbitMQ connection established and queue declared");
+                connection = factory.newConnection();
+                channel = connection.createChannel();
 
-            DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+                channel.queueDeclare("statistics_queue", false, false, false, null);
+                logger.info("RabbitMQ connection established and queue declared");
+
+                DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+                    try {
+                        String json = new String(delivery.getBody(), "UTF-8");
+                        logger.fine("Received statistics json: " + json);
+                        statsService.recordStatistics(json);
+                        channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                    } catch (Exception e) {
+                        logger.log(Level.SEVERE, "Error processing RabbitMQ message", e);
+                    }
+                };
+                CancelCallback cancelCallback = consumerTag -> {
+                    logger.warning("Message consumer was cancelled: " + consumerTag);
+                };
+                channel.basicConsume("statistics_queue", false, deliverCallback, cancelCallback);
+                logger.info("Started consuming messages from statistics_queue");
+                return;
+            }
+            catch (Exception e) {
+                attempts++;
+                logger.log(Level.SEVERE, "Error initializing RabbitMQ consumer", e);
+                if (attempts < maxAttempts) {
                 try {
-                    String json = new String(delivery.getBody(), "UTF-8");
-                    logger.fine("Received statistics json: " + json);
-                    statsService.recordStatistics(json);
-                    channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-                } catch (Exception e) {
-                    logger.log(Level.SEVERE, "Error processing RabbitMQ message", e);
+                    Thread.sleep(delayMs);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return;
                 }
-            };
-            CancelCallback cancelCallback = consumerTag -> {
-                logger.warning("Message consumer was cancelled: " + consumerTag);
-            };
-            channel.basicConsume("statistics_queue", false, deliverCallback, cancelCallback);
-            logger.info("Started consuming messages from statistics_queue");
+            }
+            }
         }
-        catch (Exception e) {
-            logger.log(Level.SEVERE, "Error initializing RabbitMQ consumer", e);
-        }
+        throw new RuntimeException("Failed to connect to RabbitMQ after " + maxAttempts + " attempts");
     }
 
     @PreDestroy
