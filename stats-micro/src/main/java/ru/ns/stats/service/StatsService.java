@@ -2,9 +2,9 @@ package ru.ns.stats.service;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import ru.ns.stats.model.HitResult;
-import ru.ns.stats.model.Stats;
-import ru.ns.stats.repository.HitResultDAO;
+import ru.ns.common.model.HitResult;
+import ru.ns.common.model.Stats;
+import ru.ns.common.repository.HitResultDAO;
 
 import java.sql.SQLException;
 import java.util.logging.Logger;

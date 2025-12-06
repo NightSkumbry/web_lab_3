@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import ru.ns.lab.model.HitResult;
-import ru.ns.lab.repository.HitResultDAO;
+import ru.ns.common.model.HitResult;
+import ru.ns.common.repository.HitResultDAO;
 
 public class HitResultsBean {
     private static final Logger logger = Logger.getLogger(HitResultsBean.class.getName());

@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+    id 'java-library'
+}
+
+group = 'ru.itmo.web.lab3'
+version = '1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api 'com.oracle.database.jdbc:ojdbc11:23.26.0.0.0'
+}
+

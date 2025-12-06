@@ -13,3 +13,4 @@
 rootProject.name = 'lab_3'
 include('app')
 include('stats-micro')
+include('common')
